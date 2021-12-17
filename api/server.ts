@@ -1,10 +1,13 @@
-/* Load the HTTP library */
-import http from "http";
+import express from "express";
 
-/* Create an HTTP server to handle responses */
+const app = express();
 
-http.createServer(function (request, response) {
-	response.writeHead(200, { "Content-Type": "text/plain" });
-	response.write("Hello World");
-	response.end();
-}).listen(8888);
+const port = 3000;
+
+app.get("/", (req, res, next) => {
+	res.send("hello world");
+});
+
+app.listen(port, () => {
+	console.log(`Server running on port: ${port}`);
+});
