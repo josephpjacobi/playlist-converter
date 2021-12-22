@@ -46,13 +46,37 @@ function App() {
 		}
 	}
 
+	async function authorizeSpotifyUser() {
+		const authURL = buildSpotifyAuthRequestURL();
+		try {
+			if (typeof authURL === "string") {
+				const spotifyAuthResponse = await fetch(authURL);
+				if (!spotifyAuthResponse.ok) {
+					throw Error(
+						`${spotifyAuthResponse.status} ${spotifyAuthResponse.statusText}`
+					);
+				}
+				const spotifyAuthJSONResponse =
+					await spotifyAuthResponse.json();
+				return spotifyAuthResponse;
+			} else {
+				throw Error("The buildSpotifyAuthURL did not return a string");
+			}
+		} catch (error) {
+			console.log(
+				"There was an issue authenticating the Spotify user: ",
+				error
+			);
+		}
+	}
+
 	return (
 		<div className="App">
 			<header className="App-header">
 				Convert Your Spotify Playlist to Apple Music
 			</header>
 			{loading ? <h1>Loading....</h1> : <></>}
-			<button onClick={() => console.log(buildSpotifyAuthRequestURL())}>
+			<button onClick={() => authorizeSpotifyUser()}>
 				Log Into Spotify
 			</button>
 		</div>
