@@ -50,7 +50,9 @@ function App() {
 		const authURL = buildSpotifyAuthRequestURL();
 		try {
 			if (typeof authURL === "string") {
-				const spotifyAuthResponse = await fetch(authURL);
+				const spotifyAuthResponse = await fetch(
+					"http://localhost:8000"
+				);
 				if (!spotifyAuthResponse.ok) {
 					throw Error(
 						`${spotifyAuthResponse.status} ${spotifyAuthResponse.statusText}`
@@ -58,7 +60,7 @@ function App() {
 				}
 				const spotifyAuthJSONResponse =
 					await spotifyAuthResponse.json();
-				return spotifyAuthResponse;
+				return spotifyAuthJSONResponse;
 			} else {
 				throw Error("The buildSpotifyAuthURL did not return a string");
 			}
