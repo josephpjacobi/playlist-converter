@@ -5,8 +5,8 @@ function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [loading, setLoading] = useState([false, ""]);
 	const [stateKey, setStateKey] = useState(generateRandomString(16));
+	const [accessToken, setAccessToken] = useState("");
 
-	// const state = generateRandomString(16);
 	const scopes: string = "playlist-read-collaborative playlist-read-private";
 
 	function generateRandomString(length: number): string {
@@ -46,6 +46,18 @@ function App() {
 		}
 	}
 
+	useState(() => {
+		function getAccessTokenFromURL() {
+			return window.location.href.slice(23, 195);
+		}
+
+		const params = getAccessTokenFromURL();
+
+		if (params.includes("access_token")) {
+			setAccessToken(window.location.href.slice(36, 195));
+		}
+	});
+
 	// async function authorizeSpotifyUser() {
 	// 	const authURL = buildSpotifyAuthRequestURL();
 	// 	console.log(authURL);
@@ -72,15 +84,36 @@ function App() {
 	// 	}
 	// }
 
+	const SpotifyLogin = () => {
+		return (
+			<a href={buildSpotifyAuthRequestURL()}>
+				<button
+					onClick={() => console.log(buildSpotifyAuthRequestURL())}
+				>
+					Log Into Spotify
+				</button>
+			</a>
+		);
+	};
+
+	interface SpotifyUserProps {
+		accessToken: string;
+	}
+
+	const SpotifyUserPage = ({ accessToken }: SpotifyUserProps) => {
+		return <div></div>;
+	};
+
 	return (
 		<div className="App">
 			<header className="App-header">
 				Convert Your Spotify Playlist to Apple Music
 			</header>
-			{loading ? <h1>Loading....</h1> : <></>}
-			<a href={buildSpotifyAuthRequestURL()}>
-				<button type="button">Log Into Spotify</button>
-			</a>
+			{accessToken ? (
+				<SpotifyUserPage accessToken={accessToken} />
+			) : (
+				<SpotifyLogin />
+			)}
 		</div>
 	);
 }
