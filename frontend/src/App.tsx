@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
@@ -7,7 +7,8 @@ function App() {
 	const [stateKey, setStateKey] = useState(generateRandomString(16));
 	const [accessToken, setAccessToken] = useState("");
 
-	const scopes: string = "playlist-read-collaborative playlist-read-private";
+	const scopes: string =
+		"playlist-read-collaborative playlist-read-private user-read-private user-read-email";
 
 	function generateRandomString(length: number): string {
 		let text: string = "";
@@ -24,21 +25,21 @@ function App() {
 	}
 
 	function buildSpotifyAuthRequestURL() {
-		const clientSecret = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+		const clientID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 		const redirect_url = process.env.REACT_APP_SPOTIFY_REDIRECT_URL;
 		const authUrl = "https://accounts.spotify.com/authorize";
 
 		if (
-			typeof clientSecret === "string" &&
+			typeof clientID === "string" &&
 			typeof redirect_url === "string" &&
 			stateKey.length > 15
 		) {
 			return (
 				authUrl +
-				"?response_type=token" +
-				`&client_id=${encodeURIComponent(clientSecret)}` +
-				`&scope=${scopes}` +
-				`&redirect_uri=${encodeURIComponent(redirect_url)}` +
+				"?response_type=code" +
+				`&client_id=${encodeURIComponent(clientID)}` +
+				`&scope=${encodeURIComponent(scopes)}` +
+				`&redirect_uri=${redirect_url}` +
 				`&state=${encodeURIComponent(stateKey)}`
 			);
 		} else {
@@ -46,17 +47,20 @@ function App() {
 		}
 	}
 
-	useState(() => {
-		function getAccessTokenFromURL() {
-			return window.location.href.slice(23, 195);
-		}
+	// useState(() => {
+	// 	function getAccessTokenFromURL(): string | null {
+	// 		const accessToken = new URLSearchParams(
+	// 			window.location.href.split("#").pop()
+	// 		).get("access_token");
+	// 		return accessToken;
+	// 	}
 
-		const params = getAccessTokenFromURL();
+	// 	const params = getAccessTokenFromURL();
 
-		if (params.includes("access_token")) {
-			setAccessToken(window.location.href.slice(36, 195));
-		}
-	});
+	// 	if (params) {
+	// 		setAccessToken(params);
+	// 	}
+	// });
 
 	// async function authorizeSpotifyUser() {
 	// 	const authURL = buildSpotifyAuthRequestURL();
@@ -84,14 +88,15 @@ function App() {
 	// 	}
 	// }
 
+	async function getSpotifyCredentials() {
+		const response = await fetch("http://localhost:8000/spotify/authorize");
+		console.log(response);
+	}
+
 	const SpotifyLogin = () => {
 		return (
 			<a href={buildSpotifyAuthRequestURL()}>
-				<button
-					onClick={() => console.log(buildSpotifyAuthRequestURL())}
-				>
-					Log Into Spotify
-				</button>
+				<button>Log Into Spotify</button>
 			</a>
 		);
 	};
@@ -101,6 +106,17 @@ function App() {
 	}
 
 	const SpotifyUserPage = ({ accessToken }: SpotifyUserProps) => {
+		useEffect(() => {
+			async function getCurrentUsersPlaylistData() {
+				const playlistReponse = await fetch(
+					"https://api.spotify.com/me/playlists"
+				);
+				const jsonResponse = await playlistReponse.json();
+				return jsonResponse;
+			}
+
+			console.log(getCurrentUsersPlaylistData());
+		}, []);
 		return <div></div>;
 	};
 
