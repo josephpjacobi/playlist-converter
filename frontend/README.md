@@ -1,46 +1,152 @@
-# Getting Started with Create React App
+# Project Steps
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 1 Get Access Token from Spotify - DONE
 
-## Available Scripts
+# 1A Enable Refresh Token
 
-In the project directory, you can run:
+# 2 Get User Profile Information
 
-### `npm start`
+2.1 Get Current Users Profile Endpoint: GET /me
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+    Response:
+    {
+      "country": "string",
+      "display_name": "string", <--------- display name OR "Spotify User" if null
+      "email": "string", <---------------- email
+      "explicit_content": {
+        "filter_enabled": true,
+        "filter_locked": true
+      },
+      "external_urls": {
+        "spotify": "string"
+      },
+      "followers": {
+        "href": "string",
+        "total": 0
+      },
+      "href": "string",
+      "id": "string", <-------------------- id (Spotify User ID)
+      "images": [ <------------------------ images.url to display on profile page
+        {
+          "url": "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228\n",
+          "height": 300,
+          "width": 300
+        }
+      ],
+      "product": "string",
+      "type": "string",
+      "uri": "string"
+    }
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+2.2 Handle Errors:
+401 - Reauthenticate the User
+403?
+429 - Exceeded rate limit - try again in X amount of time
 
-### `npm test`
+# 3 Get User's Playlists
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    2.1 Get Current User's Playlists Endpoint: GET /me/playlists
+      limit=50
 
-### `npm run build`
+      Response:
+      {
+        "href": "https://api.spotify.com/v1/me/shows?offset=0&limit=20\n",
+        "items": [   <--------------------------------------------------------- items an Array of Objects ??? - NEED TO SEE WHAT THIS LOOKS LIKE
+          {}         <--------------------------------------------------------- I need the PLAYLIST ID from each playlist
+        ],
+        "limit": 20,
+        "next": "https://api.spotify.com/v1/me/shows?offset=1&limit=1", <------- next (URL to the next page of playlists OR null)
+        "offset": 0,
+        "previous": "https://api.spotify.com/v1/me/shows?offset=1&limit=1", <--- previous IF NOT NULL (previous page of playlists OR null)
+        "total": 4
+      }
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# 4 User Selects Which Playlist they would like to convert
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    4.1 Conditionally render radio buttons to select the playlist?
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# 5 Get Playlist Details for selected playlist
 
-### `npm run eject`
+    5.1 Which endpoint should I use?
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+        Start with Option 2, if a user wants to copy the name/description/playlist image over to Apple Music then we can use Option 1
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+     OPTION 1:
+      Get Playlist Endpoint: GET /playlists/{playlist_id}
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+        Response:
+          {
+            "collaborative": true,
+            "description": "string", <------------------------------------------------------------------- description (description of playlist)
+            "external_urls": {
+              "spotify": "string"
+            },
+            "followers": {
+              "href": "string",
+              "total": 0
+            },
+            "href": "string",
+            "id": "string",
+            "images": [
+              {
+                "url": "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228\n", <------------ images.url (Playlist image?)
+                "height": 300,
+                "width": 300
+              }
+            ],
+            "name": "string", <---------------------------------------------------------------------------- name (Name of the playlist)
+            "owner": {
+              "display_name": "string",
+              "external_urls": {
+                "spotify": "string"
+              },
+              "followers": {
+                "href": "string",
+                "total": 0
+              },
+              "href": "string",
+              "id": "string",
+              "images": [
+                {
+                  "url": "https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228\n",
+                  "height": 300,
+                  "width": 300
+                }
+              ],
+              "type": "user",
+              "uri": "string"
+            },
+            "public": true,
+            "snapshot_id": "string",
+            "tracks": { <------------------------------------------------------------------------------------ tracks.items (Array or Objects)
+              "href": "https://api.spotify.com/v1/me/shows?offset=0&limit=20\n",
+              "items": [
+                {} <------------------------------------------------------------------------------------------ NEED TO SEE WHAT OBJECT LOOKS LIKE
+              ],
+              "limit": 20,
+              "next": "https://api.spotify.com/v1/me/shows?offset=1&limit=1",
+              "offset": 0,
+              "previous": "https://api.spotify.com/v1/me/shows?offset=1&limit=1",
+              "total": 4
+            },
+            "type": "string",
+            "uri": "string"
+          }
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+     OPTION 2:
+      Get Playlist Items Endpoint: GET /playlists/{playlist_id}/tracks
 
-## Learn More
+      Response:
+       {
+          "href": "https://api.spotify.com/v1/me/shows?offset=0&limit=20\n",
+          "items": [
+            {} <------------------------------------------------------------------------------------------ NEED TO SEE WHAT OBJECT LOOKS LIKE
+          ],
+          "limit": 20,
+          "next": "https://api.spotify.com/v1/me/shows?offset=1&limit=1", <-------------------------------- next (If playlist has over 50 songs)
+          "offset": 0,
+          "previous": "https://api.spotify.com/v1/me/shows?offset=1&limit=1", <----------------------------- previos (If playlist has over 50 songs and user goes to the next page)
+          "total": 4
+        }
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+# 6 "Covert Playlist"
