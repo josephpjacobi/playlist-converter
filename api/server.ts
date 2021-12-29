@@ -22,8 +22,6 @@ async function requestAccessToken(code: string) {
 			grant_type: "authorization_code",
 		});
 
-		console.log("bod", body);
-
 		const response = await fetch("https://accounts.spotify.com/api/token", {
 			method: "POST",
 			headers: {
@@ -42,18 +40,15 @@ const app = express();
 
 app.use(cors());
 
-// app.get("/", (req, res, next) => {
-// 	res.send({ response: "hello world" });
-// });
-
 app.get("/redirect", async (req, res, next) => {
 	console.log("redirect");
 
 	const { code, state, error } = req.query;
 
 	if (!error && typeof code === "string") {
-		const accessToken = await requestAccessToken(code);
-		console.log(accessToken);
+		const { access_token, token_type, expires_in, refresh_token, scope } =
+			await requestAccessToken(code);
+		console.log(access_token, token_type, expires_in, refresh_token, scope);
 
 		res.send({ code, state });
 	} else {
